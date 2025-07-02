@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>削れるパーセント自己申告</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    <h1 class="mb-4 text-center">各ステージ 削れるパーセント申告</h1>
+
+    <form action="/declare" method="post" class="card p-4 shadow-sm bg-white">
+      <div class="mb-3">
+        <label class="form-label">名前</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
+
+      {% for i in range(1, 7) %}
+      <div class="mb-3">
+        <label class="form-label">ステージ {{ i }} 削れる％</label>
+        <input type="number" name="stage{{ i }}" min="0" max="100" class="form-control" required>
+      </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-success w-100">申告する</button>
+    </form>
+
+    <hr class="my-4">
+    <h2 class="mb-3">申告一覧</h2>
+    <ul class="list-group">
+      {% for entry in declarations %}
+        <li class="list-group-item">
+          👤 <strong>{{ entry.name }}</strong>
+          {% for i in range(1, 7) %}
+            ｜ {{ i }}: {{ entry["stage" ~ i] }}%
+          {% endfor %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>
