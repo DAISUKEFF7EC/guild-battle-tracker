@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ギルドバトル記録</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">ギルドバトル記録フォーム</h1>
+
+        <form action="/submit" method="post" class="card p-4 shadow-sm bg-white">
+            <div class="mb-3">
+                <label class="form-label">名前</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">日付</label>
+                <input type="date" name="date" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">回数（1～3）</label>
+                <input type="number" name="count" min="1" max="3" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">ステージ番号（1～6）</label>
+                <input type="number" name="stage" min="1" max="6" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">ダメージ</label>
+                <input type="number" name="damage" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">記録する</button>
+        </form>
+
+        <hr class="my-4">
+
+        <h2 class="mb-3">記録一覧</h2>
+        <ul class="list-group">
+            {% for item in log %}
+                <li class="list-group-item">
+                    📅 {{ item.date }} / 👤 <strong>{{ item.name }}</strong> - {{ item.count }}回目 / ステージ{{ item.stage }} / 💥 {{ item.damage }}ダメージ
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
