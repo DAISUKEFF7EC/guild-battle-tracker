@@ -51,7 +51,7 @@ def submit_battle(
     return RedirectResponse(url="/", status_code=303)
 
 # ------------------------
-# 削れる％申告フォーム
+# 削れる％申告フォーム（同名なら上書き）
 # ------------------------
 @app.get("/declare", response_class=HTMLResponse)
 def show_declare_form(request: Request):
@@ -67,23 +67,36 @@ def submit_declare(
     stage5: int = Form(...),
     stage6: int = Form(...)
 ):
-    new_entry = {
-        "name": name,
-        "stage1": stage1,
-        "stage2": stage2,
-        "stage3": stage3,
-        "stage4": stage4,
-        "stage5": stage5,
-        "stage6": stage6
-    }
-    declare_log.append(new_entry)
+    found = False
+    for entry in declare_log:
+        if entry["name"] == name:
+            entry["stage1"] = stage1
+            entry["stage2"] = stage2
+            entry["stage3"] = stage3
+            entry["stage4"] = stage4
+            entry["stage5"] = stage5
+            entry["stage6"] = stage6
+            found = True
+            break
+
+    if not found:
+        declare_log.append({
+            "name": name,
+            "stage1": stage1,
+            "stage2": stage2,
+            "stage3": stage3,
+            "stage4": stage4,
+            "stage5": stage5,
+            "stage6": stage6
+        })
+
     with open(DECLARE_FILE, "w", encoding="utf-8") as f:
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
 
     return RedirectResponse(url="/declare", status_code=303)
 
 # ------------------------
-# 参加可能時間申告フォーム
+# 参加可能時間申告フォーム（同名なら上書き）
 # ------------------------
 @app.get("/available", response_class=HTMLResponse)
 def show_available_form(request: Request):
@@ -96,13 +109,23 @@ def submit_available(
     day2: str = Form(...),
     day3: str = Form(...)
 ):
-    new_entry = {
-        "name": name,
-        "day1": day1,
-        "day2": day2,
-        "day3": day3
-    }
-    available_log.append(new_entry)
+    found = False
+    for entry in available_log:
+        if entry["name"] == name:
+            entry["day1"] = day1
+            entry["day2"] = day2
+            entry["day3"] = day3
+            found = True
+            break
+
+    if not found:
+        available_log.append({
+            "name": name,
+            "day1": day1,
+            "day2": day2,
+            "day3": day3
+        })
+
     with open(AVAIL_FILE, "w", encoding="utf-8") as f:
         json.dump(available_log, f, indent=2, ensure_ascii=False)
 
