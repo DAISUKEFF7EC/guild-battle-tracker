@@ -22,14 +22,12 @@ def show_form(request: Request):
 
 @app.post("/submit")
 def submit_battle(
-    request: Request,
     name: str = Form(...),
     date: str = Form(...),
     count: int = Form(...),
     stage: int = Form(...),
     damage: int = Form(...)
 ):
-    # 新しい記録を追加
     new_entry = {
         "name": name,
         "date": date,
@@ -39,13 +37,10 @@ def submit_battle(
     }
     battle_log.append(new_entry)
 
-    # JSONファイルに保存
+    # 保存
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
 
     return RedirectResponse(url="/", status_code=303)
 
-# FastAPIを起動（Replit実行対応）
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# Render用にはこの起動は不要（Render側が起動する）
