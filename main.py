@@ -7,29 +7,28 @@ import json
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-DATA_FILE = "battle_log.json"
-DECL_FILE = "declarations.json"
+BATTLE_FILE = "battle_log.json"
+DECLARE_FILE = "declare_log.json"
+AVAIL_FILE = "available_log.json"
 
-# バトルログ初期ロード
-if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        battle_log = json.load(f)
-else:
-    battle_log = []
+# 各ファイルの読み込み（存在しない場合は空配列）
+def load_data(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
 
-# ステージ削り申告データ初期ロード
-if os.path.exists(DECL_FILE):
-    with open(DECL_FILE, "r", encoding="utf-8") as f:
-        declarations = json.load(f)
-else:
-    declarations = []
+battle_log = load_data(BATTLE_FILE)
+declare_log = load_data(DECLARE_FILE)
+available_log = load_data(AVAIL_FILE)
 
-# メインフォーム表示
+# ------------------------
+# トップ（戦闘記録フォーム）
+# ------------------------
 @app.get("/", response_class=HTMLResponse)
 def show_form(request: Request):
     return templates.TemplateResponse("form.html", {"request": request, "log": battle_log})
 
-# バトル記録登録
 @app.post("/submit")
 def submit_battle(
     name: str = Form(...),
@@ -46,20 +45,20 @@ def submit_battle(
         "damage": damage
     }
     battle_log.append(new_entry)
-
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
+    with open(BATTLE_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
 
     return RedirectResponse(url="/", status_code=303)
 
-# 削りパーセント申告フォーム表示
+# ------------------------
+# 削れる％申告フォーム
+# ------------------------
 @app.get("/declare", response_class=HTMLResponse)
-def show_declaration_form(request: Request):
-    return templates.TemplateResponse("declaration.html", {"request": request, "declarations": declarations})
+def show_declare_form(request: Request):
+    return templates.TemplateResponse("declare.html", {"request": request, "declarations": declare_log})
 
-# 削りパーセント申告登録
 @app.post("/declare")
-def submit_declaration(
+def submit_declare(
     name: str = Form(...),
     stage1: int = Form(...),
     stage2: int = Form(...),
@@ -68,18 +67,43 @@ def submit_declaration(
     stage5: int = Form(...),
     stage6: int = Form(...)
 ):
-    entry = {
+    new_entry = {
         "name": name,
         "stage1": stage1,
         "stage2": stage2,
         "stage3": stage3,
         "stage4": stage4,
         "stage5": stage5,
-        "stage6": stage6,
+        "stage6": stage6
     }
-    declarations.append(entry)
-
-    with open(DECL_FILE, "w", encoding="utf-8") as f:
-        json.dump(declarations, f, indent=2, ensure_ascii=False)
+    declare_log.append(new_entry)
+    with open(DECLARE_FILE, "w", encoding="utf-8") as f:
+        json.dump(declare_log, f, indent=2, ensure_ascii=False)
 
     return RedirectResponse(url="/declare", status_code=303)
+
+# ------------------------
+# 参加可能時間申告フォーム
+# ------------------------
+@app.get("/available", response_class=HTMLResponse)
+def show_available_form(request: Request):
+    return templates.TemplateResponse("available.html", {"request": request, "availabilities": available_log})
+
+@app.post("/available")
+def submit_available(
+    name: str = Form(...),
+    day1: str = Form(...),
+    day2: str = Form(...),
+    day3: str = Form(...)
+):
+    new_entry = {
+        "name": name,
+        "day1": day1,
+        "day2": day2,
+        "day3": day3
+    }
+    available_log.append(new_entry)
+    with open(AVAIL_FILE, "w", encoding="utf-8") as f:
+        json.dump(available_log, f, indent=2, ensure_ascii=False)
+
+    return RedirectResponse(url="/available", status_code=303)
