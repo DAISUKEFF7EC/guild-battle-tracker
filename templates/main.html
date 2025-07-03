@@ -15,6 +15,7 @@
 </nav>
 
 <div class="container mt-4">
+  <!-- タブメニュー -->
   <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item"><button class="nav-link active" id="battle-tab" data-bs-toggle="tab" data-bs-target="#battle" type="button">戦闘記録</button></li>
     <li class="nav-item"><button class="nav-link" id="declare-tab" data-bs-toggle="tab" data-bs-target="#declare" type="button">削れる％申告</button></li>
@@ -23,8 +24,8 @@
   </ul>
 
   <div class="tab-content pt-4" id="myTabContent">
-    <!-- 戦闘記録 -->
-    <div class="tab-pane fade show active" id="battle">
+    <!-- 戦闘記録フォーム -->
+    <div class="tab-pane fade show active" id="battle" role="tabpanel">
       <form action="/submit" method="post" class="card p-3 mb-3">
         <h5>戦闘記録の登録</h5>
         <input name="name" class="form-control mb-2" placeholder="名前" required>
@@ -42,9 +43,23 @@
         <input name="damage" type="number" class="form-control mb-2" placeholder="ダメージ" required>
         <button class="btn btn-primary w-100">記録する</button>
       </form>
+
+      <ul class="list-group">
+        {% for entry in log %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ entry.day }} ｜ {{ entry.name }} ｜ {{ entry.stage }}ステ ｜ {{ entry.damage }}ダメージ（{{ entry.count }}回目）
+            <form method="post" action="/delete_battle" class="ms-3">
+              <input type="hidden" name="name" value="{{ entry.name }}">
+              <input type="hidden" name="day" value="{{ entry.day }}">
+              <input type="hidden" name="count" value="{{ entry.count }}">
+              <button class="btn btn-sm btn-danger">削除</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
     </div>
 
-    <!-- 削れる％申告 -->
+    <!-- 削れる％ -->
     <div class="tab-pane fade" id="declare">
       <form action="/declare" method="post" class="card p-3 mb-3">
         <h5>削れる％の申告</h5>
@@ -54,6 +69,19 @@
         {% endfor %}
         <button class="btn btn-success w-100">申告する</button>
       </form>
+      <ul class="list-group">
+        {% for entry in declarations %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {{ entry.name }} ｜ {% for i in range(1, 7) %}{{ i }}: {{ entry["stage" ~ i] }}％ {% endfor %}
+            </div>
+            <form method="post" action="/delete_declare" class="ms-3">
+              <input type="hidden" name="name" value="{{ entry.name }}">
+              <button class="btn btn-sm btn-danger">削除</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
     </div>
 
     <!-- 参加可能時間 -->
@@ -74,11 +102,41 @@
         {% endfor %}
         <button class="btn btn-info w-100">申告する</button>
       </form>
+      <ul class="list-group">
+        {% for entry in availabilities %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {{ entry.name }} ｜
+              1日目:
+              {% if entry.day1 is string %}
+                {{ entry.day1 }}
+              {% elif entry.day1 is iterable and entry.day1|length > 0 %}
+                {{ entry.day1 | join(', ') }}
+              {% else %}なし{% endif %} ｜
+              2日目:
+              {% if entry.day2 is string %}
+                {{ entry.day2 }}
+              {% elif entry.day2 is iterable and entry.day2|length > 0 %}
+                {{ entry.day2 | join(', ') }}
+              {% else %}なし{% endif %} ｜
+              3日目:
+              {% if entry.day3 is string %}
+                {{ entry.day3 }}
+              {% elif entry.day3 is iterable and entry.day3|length > 0 %}
+                {{ entry.day3 | join(', ') }}
+              {% else %}なし{% endif %}
+            </div>
+            <form method="post" action="/delete_available" class="ms-3">
+              <input type="hidden" name="name" value="{{ entry.name }}">
+              <button class="btn btn-sm btn-danger">削除</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
     </div>
 
     <!-- 申告一覧 -->
-    <div class="tab-pane fade" id="summary">
-      <h5>プレイヤー申告一覧</h5>
+    <h5>プレイヤー申告一覧</h5>
       <div class="table-responsive">
         <table class="table table-bordered text-center align-middle">
           <thead class="table-light">
@@ -91,9 +149,9 @@
               <th colspan="3">DAY3</th>
             </tr>
             <tr>
-              {% for i in range(1, 4) %}<th>{{ i }}回目</th>{% endfor %}
-              {% for i in range(1, 4) %}<th>{{ i }}回目</th>{% endfor %}
-              {% for i in range(1, 4) %}<th>{{ i }}回目</th>{% endfor %}
+              {% for _ in range(3) %}<th>{{ loop.index }}回目</th>{% endfor %}
+              {% for _ in range(3) %}<th>{{ loop.index }}回目</th>{% endfor %}
+              {% for _ in range(3) %}<th>{{ loop.index }}回目</th>{% endfor %}
             </tr>
           </thead>
           <tbody>
@@ -129,7 +187,12 @@
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+
+
+
+
+    
 
   </div>
 </div>
@@ -137,3 +200,5 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
