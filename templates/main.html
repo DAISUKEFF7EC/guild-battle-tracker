@@ -164,10 +164,10 @@
                                 {% for day in ['DAY1', 'DAY2', 'DAY3'] %}
                                 {% for count in [1, 2, 3] %}
                                 <td>
-                                    {% if name in battle_summary and day in battle_summary[name] and count in battle_summary[name][day] %}
-                                    {% if name in battle_summary and day in battle_summary[name] and count in battle_summary[name][day] %}
+{% if name in battle_summary and day in battle_summary[name] and count in battle_summary[name][day] %}
 ✓
 {% endif %}
+
 
                                 </td>
                                 {% endfor %}
