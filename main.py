@@ -23,12 +23,8 @@ declare_log = load_data(DECLARE_FILE)
 available_log = load_data(AVAIL_FILE)
 
 # ------------------------
-# トップ（戦闘記録フォーム）
+# トップ（1画面で全タブ表示）
 # ------------------------
-#@app.get("/", response_class=HTMLResponse)
-#def show_form(request: Request):
-#    return templates.TemplateResponse("form.html", {"request": request, "log": battle_log})
-
 @app.get("/", response_class=HTMLResponse)
 def show_form(request: Request):
     return templates.TemplateResponse("main.html", {
@@ -38,7 +34,9 @@ def show_form(request: Request):
         "availabilities": available_log
     })
 
-
+# ------------------------
+# 戦闘記録の登録
+# ------------------------
 @app.post("/submit")
 def submit_battle(
     name: str = Form(...),
@@ -60,8 +58,19 @@ def submit_battle(
 
     return RedirectResponse(url="/", status_code=303)
 
+@app.post("/delete_battle")
+def delete_battle(name: str = Form(...), date: str = Form(...), count: int = Form(...)):
+    global battle_log
+    battle_log = [
+        entry for entry in battle_log
+        if not (entry["name"] == name and entry["date"] == date and entry["count"] == count)
+    ]
+    with open(BATTLE_FILE, "w", encoding="utf-8") as f:
+        json.dump(battle_log, f, indent=2, ensure_ascii=False)
+    return RedirectResponse(url="/", status_code=303)
+
 # ------------------------
-# 削れる％申告フォーム（同名なら上書き）
+# 削れる％申告（同名上書き + 削除）
 # ------------------------
 @app.get("/declare", response_class=HTMLResponse)
 def show_declare_form(request: Request):
@@ -103,10 +112,18 @@ def submit_declare(
     with open(DECLARE_FILE, "w", encoding="utf-8") as f:
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
 
-    return RedirectResponse(url="/declare", status_code=303)
+    return RedirectResponse(url="/", status_code=303)
+
+@app.post("/delete_declare")
+def delete_declare(name: str = Form(...)):
+    global declare_log
+    declare_log = [entry for entry in declare_log if entry["name"] != name]
+    with open(DECLARE_FILE, "w", encoding="utf-8") as f:
+        json.dump(declare_log, f, indent=2, ensure_ascii=False)
+    return RedirectResponse(url="/", status_code=303)
 
 # ------------------------
-# 参加可能時間申告フォーム（同名なら上書き）
+# 参加可能時間申告（同名上書き + 削除）
 # ------------------------
 @app.get("/available", response_class=HTMLResponse)
 def show_available_form(request: Request):
@@ -139,4 +156,12 @@ def submit_available(
     with open(AVAIL_FILE, "w", encoding="utf-8") as f:
         json.dump(available_log, f, indent=2, ensure_ascii=False)
 
-    return RedirectResponse(url="/available", status_code=303)
+    return RedirectResponse(url="/", status_code=303)
+
+@app.post("/delete_available")
+def delete_available(name: str = Form(...)):
+    global available_log
+    available_log = [entry for entry in available_log if entry["name"] != name]
+    with open(AVAIL_FILE, "w", encoding="utf-8") as f:
+        json.dump(available_log, f, indent=2, ensure_ascii=False)
+    return RedirectResponse(url="/", status_code=303)
