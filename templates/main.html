@@ -103,17 +103,17 @@
                 <ul class="list-group">
                     {% for entry in availabilities %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            {{ entry.name }} ｜
-                            1日目: {{ available.day1.split(',') | map('trim') | join(', ') if available.day1 != 'なし' else 'なし' }}｜
-                            2日目: {{ available.day2.split(',') | map('trim') | join(', ') if available.day2 != 'なし' else 'なし' }}｜
-                            3日目:  {{ available.day3.split(',') | map('trim') | join(', ') if available.day3 != 'なし' else 'なし' }}
-                        </div>
-                        <form method="post" action="/delete_available" class="ms-3">
-                            <input type="hidden" name="name" value="{{ entry.name }}">
-                            <button class="btn btn-sm btn-danger">削除</button>
-                        </form>
-                    </li>
+    <div>
+        {{ entry.name }} ｜ 
+        1日目: {{ entry.day1.split(',') | map('trim') | join(', ') if entry.day1 != 'なし' else 'なし' }}｜
+        2日目: {{ entry.day2.split(',') | map('trim') | join(', ') if entry.day2 != 'なし' else 'なし' }}｜
+        3日目: {{ entry.day3.split(',') | map('trim') | join(', ') if entry.day3 != 'なし' else 'なし' }}
+    </div>
+    <form method="post" action="/delete_available" class="ms-3">
+        <input type="hidden" name="name" value="{{ entry.name }}">
+        <button class="btn btn-sm btn-danger">削除</button>
+    </form>
+</li>
                     {% endfor %}
                 </ul>
             </div>
