@@ -36,9 +36,7 @@ def get_all_names():
     names = {entry["name"] for entry in battle_log + declare_log + available_log}
     return sorted(names)
 
-# -------------------------------
 # トップ（テンプレートに集計反映）
-# -------------------------------
 @app.get("/", response_class=HTMLResponse)
 def show_form(request: Request):
     return templates.TemplateResponse("main.html", {
@@ -50,9 +48,7 @@ def show_form(request: Request):
         "player_names": get_all_names()
     })
 
-# -------------------------------
 # 戦闘記録 登録・削除
-# -------------------------------
 @app.post("/submit")
 def submit_battle(
     request: Request,
@@ -85,9 +81,7 @@ def delete_battle(request: Request, name: str = Form(...), day: str = Form(...),
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
     return show_form(request)
 
-# -------------------------------
 # 削れる％申告（上書き＋削除）
-# -------------------------------
 @app.post("/declare")
 def submit_declare(
     request: Request,
@@ -126,17 +120,19 @@ def delete_declare(request: Request, name: str = Form(...)):
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
     return show_form(request)
 
-# -------------------------------
 # 参加可能時間（上書き＋削除）
-# -------------------------------
 @app.post("/available")
 def submit_available(
     request: Request,
     name: str = Form(...),
-    day1: Optional[str] = Form(""),
-    day2: Optional[str] = Form(""),
-    day3: Optional[str] = Form("")
+    day1_slots: Optional[List[str]] = Form(None),
+    day2_slots: Optional[List[str]] = Form(None),
+    day3_slots: Optional[List[str]] = Form(None)
 ):
+    day1 = ", ".join(day1_slots) if day1_slots else ""
+    day2 = ", ".join(day2_slots) if day2_slots else ""
+    day3 = ", ".join(day3_slots) if day3_slots else ""
+
     found = False
     for entry in available_log:
         if entry["name"] == name:
