@@ -65,6 +65,8 @@ def submit_battle(
     stage: int = Form(...),
     damage: int = Form(...)
 ):
+    count = f"{count}回目"  # ← ここで変換！
+
     new_entry = {
         "name": name,
         "day": day,
@@ -72,9 +74,11 @@ def submit_battle(
         "stage": stage,
         "damage": damage
     }
+
     battle_log.append(new_entry)
     with open(BATTLE_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
+
     return show_form(request)
 
 @app.post("/delete_battle")
