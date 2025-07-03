@@ -84,7 +84,8 @@
       </ul>
     </div>
 
-    <!-- 参加可能時間 -->
+
+ <!-- 参加可能時間 -->
     <div class="tab-pane fade" id="available">
       <form action="/available" method="post" class="card p-3 mb-3">
         <h5>参加可能時間の申告</h5>
@@ -106,7 +107,10 @@
         {% for entry in availabilities %}
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
-              {{ entry.name }} ｜ 1日目: {{ entry.day1 }} ｜ 2日目: {{ entry.day2 }} ｜ 3日目: {{ entry.day3 }}
+              {{ entry.name }} ｜ 
+              1日目: {% if entry.day1 %}{{ entry.day1 | join(', ') }}{% else %}なし{% endif %} ｜ 
+              2日目: {% if entry.day2 %}{{ entry.day2 | join(', ') }}{% else %}なし{% endif %} ｜ 
+              3日目: {% if entry.day3 %}{{ entry.day3 | join(', ') }}{% else %}なし{% endif %}
             </div>
             <form method="post" action="/delete_available" class="ms-3">
               <input type="hidden" name="name" value="{{ entry.name }}">
