@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
 import json
+from collections import defaultdict
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -11,7 +12,7 @@ BATTLE_FILE = "battle_log.json"
 DECLARE_FILE = "declare_log.json"
 AVAIL_FILE = "available_log.json"
 
-# 各ファイルの読み込み（存在しない場合は空配列）
+# ファイルの読み込み（存在しない場合は空リスト）
 def load_data(file_path):
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
@@ -22,21 +23,32 @@ battle_log = load_data(BATTLE_FILE)
 declare_log = load_data(DECLARE_FILE)
 available_log = load_data(AVAIL_FILE)
 
-# ------------------------
-# トップ（1画面で全タブ表示）
-# ------------------------
+# 戦闘記録をプレイヤー×日付でまとめる関数
+def summarize_battle_log():
+    summary = defaultdict(lambda: defaultdict(list))  # {name: {date: [count1, count2, ...]}}
+    for entry in battle_log:
+        summary[entry["name"]][entry["date"]].append(entry["count"])
+    # 重複を除いてソート
+    return {name: {date: sorted(set(counts)) for date, counts in dates.items()} for name, dates in summary.items()}
+
+# 一意なプレイヤー名のリスト
+def get_all_names():
+    names = {entry["name"] for entry in battle_log + declare_log + available_log}
+    return sorted(names)
+
+# トップページ
 @app.get("/", response_class=HTMLResponse)
 def show_form(request: Request):
     return templates.TemplateResponse("main.html", {
         "request": request,
         "log": battle_log,
         "declarations": declare_log,
-        "availabilities": available_log
+        "availabilities": available_log,
+        "battle_summary": summarize_battle_log(),
+        "player_names": get_all_names()
     })
 
-# ------------------------
 # 戦闘記録の登録
-# ------------------------
 @app.post("/submit")
 def submit_battle(
     request: Request,
@@ -71,9 +83,7 @@ def delete_battle(request: Request, name: str = Form(...), date: str = Form(...)
 
     return show_form(request)
 
-# ------------------------
-# 削れる％申告（同名上書き + 削除）
-# ------------------------
+# 削れる％申告（上書き）
 @app.post("/declare")
 def submit_declare(
     request: Request,
@@ -88,24 +98,18 @@ def submit_declare(
     found = False
     for entry in declare_log:
         if entry["name"] == name:
-            entry["stage1"] = stage1
-            entry["stage2"] = stage2
-            entry["stage3"] = stage3
-            entry["stage4"] = stage4
-            entry["stage5"] = stage5
-            entry["stage6"] = stage6
+            entry.update({
+                "stage1": stage1, "stage2": stage2, "stage3": stage3,
+                "stage4": stage4, "stage5": stage5, "stage6": stage6
+            })
             found = True
             break
 
     if not found:
         declare_log.append({
             "name": name,
-            "stage1": stage1,
-            "stage2": stage2,
-            "stage3": stage3,
-            "stage4": stage4,
-            "stage5": stage5,
-            "stage6": stage6
+            "stage1": stage1, "stage2": stage2, "stage3": stage3,
+            "stage4": stage4, "stage5": stage5, "stage6": stage6
         })
 
     with open(DECLARE_FILE, "w", encoding="utf-8") as f:
@@ -121,9 +125,7 @@ def delete_declare(request: Request, name: str = Form(...)):
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
     return show_form(request)
 
-# ------------------------
-# 参加可能時間申告（同名上書き + 削除）
-# ------------------------
+# 参加可能時間（上書き）
 @app.post("/available")
 def submit_available(
     request: Request,
@@ -135,9 +137,7 @@ def submit_available(
     found = False
     for entry in available_log:
         if entry["name"] == name:
-            entry["day1"] = day1
-            entry["day2"] = day2
-            entry["day3"] = day3
+            entry.update({"day1": day1, "day2": day2, "day3": day3})
             found = True
             break
 
