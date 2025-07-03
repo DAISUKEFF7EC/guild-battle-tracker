@@ -129,9 +129,9 @@ def submit_available(
     day2_slots: Optional[List[str]] = Form(None),
     day3_slots: Optional[List[str]] = Form(None)
 ):
-    day1 = ", ".join(day1_slots) if day1_slots else ""
-    day2 = ", ".join(day2_slots) if day2_slots else ""
-    day3 = ", ".join(day3_slots) if day3_slots else ""
+    day1 = ", ".join(day1_slots) if day1_slots else "なし"
+    day2 = ", ".join(day2_slots) if day2_slots else "なし"
+    day3 = ", ".join(day3_slots) if day3_slots else "なし"
 
     found = False
     for entry in available_log:
