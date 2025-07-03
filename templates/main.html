@@ -136,34 +136,49 @@
     </div>
 
     <!-- 申告一覧 -->
-    <div class="tab-pane fade" id="summary">
-      <h5>プレイヤー申告一覧</h5>
+          <h5>プレイヤー申告一覧</h5>
       <div class="table-responsive">
-        <table class="table table-bordered text-center">
+        <table class="table table-bordered text-center align-middle">
           <thead class="table-light">
             <tr>
-              <th>名前</th>
-              <th colspan="3">1日目</th>
-              <th colspan="3">2日目</th>
-              <th colspan="3">3日目</th>
+              <th rowspan="2">プレーヤー名</th>
+              <th rowspan="2">削れる％</th>
+              <th rowspan="2">参加可能日程</th>
+              <th colspan="3">DAY1</th>
+              <th colspan="3">DAY2</th>
+              <th colspan="3">DAY3</th>
             </tr>
             <tr>
-              <th></th>
-              {% for _ in range(3) %}
-                <th>1回目</th><th>2回目</th><th>3回目</th>
-              {% endfor %}
+              {% for _ in range(3) %}<th>{{ loop.index }}回目</th>{% endfor %}
+              {% for _ in range(3) %}<th>{{ loop.index }}回目</th>{% endfor %}
+              {% for _ in range(3) %}<th>{{ loop.index }}回目</th>{% endfor %}
             </tr>
           </thead>
           <tbody>
             {% for name in player_names %}
               <tr>
                 <td>{{ name }}</td>
+                <td>
+                  {% set declare = declarations | selectattr("name", "equalto", name) | first %}
+                  {% if declare %}
+                    {% for i in range(1, 7) %}Stage{{ i }}:{{ declare["stage" ~ i] }}%<br>{% endfor %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% set available = availabilities | selectattr("name", "equalto", name) | first %}
+                  {% if available %}
+                    1日目:
+                    {% if available.day1 %}{{ available.day1 | join(", ") }}{% else %}なし{% endif %}<br>
+                    2日目:
+                    {% if available.day2 %}{{ available.day2 | join(", ") }}{% else %}なし{% endif %}<br>
+                    3日目:
+                    {% if available.day3 %}{{ available.day3 | join(", ") }}{% else %}なし{% endif %}
+                  {% endif %}
+                </td>
                 {% for day in ['DAY1', 'DAY2', 'DAY3'] %}
                   {% for count in [1, 2, 3] %}
                     <td>
-                      {% if battle_summary.get(name, {}).get(day, []) | select('eq', count) | list | length > 0 %}
-                        ✓
-                      {% endif %}
+                      {% if battle_summary.get(name, {}).get(day, []) | select('eq', count) | list | length > 0 %}✓{% endif %}
                     </td>
                   {% endfor %}
                 {% endfor %}
@@ -172,7 +187,11 @@
           </tbody>
         </table>
       </div>
-    </div>
+
+
+
+
+    
 
   </div>
 </div>
