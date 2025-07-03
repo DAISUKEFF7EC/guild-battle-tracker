@@ -121,52 +121,34 @@
     <div class="tab-pane fade" id="summary">
       <h5>プレイヤー申告一覧</h5>
       <div class="table-responsive">
-        <table class="table table-bordered table-striped text-center">
+        <table class="table table-bordered text-center">
           <thead class="table-light">
             <tr>
               <th>名前</th>
-              <th>ステージ削り</th>
-              <th>1日目</th>
-              <th>2日目</th>
-              <th>3日目</th>
-              <th>戦闘記録</th>
+              <th colspan="3">1日目</th>
+              <th colspan="3">2日目</th>
+              <th colspan="3">3日目</th>
+            </tr>
+            <tr>
+              <th></th>
+              {% for _ in range(3) %}
+                <th>1回目</th><th>2回目</th><th>3回目</th>
+              {% endfor %}
             </tr>
           </thead>
           <tbody>
             {% for name in player_names %}
               <tr>
                 <td>{{ name }}</td>
-                <td>
-                  {% for entry in declarations if entry.name == name %}
-                    {% for i in range(1,7) %}
-                      {% if entry["stage" ~ i]|int > 0 %}
-                        STG{{ i }} {{ entry["stage" ~ i] }}%<br>
+                {% for day in ['DAY1', 'DAY2', 'DAY3'] %}
+                  {% for count in [1, 2, 3] %}
+                    <td>
+                      {% if battle_summary.get(name, {}).get(day, []) | select('eq', count) | list | length > 0 %}
+                        ✓
                       {% endif %}
-                    {% endfor %}
+                    </td>
                   {% endfor %}
-                </td>
-                <td>
-                  {% for entry in availabilities if entry.name == name %}
-                    {{ entry.day1 }}
-                  {% endfor %}
-                </td>
-                <td>
-                  {% for entry in availabilities if entry.name == name %}
-                    {{ entry.day2 }}
-                  {% endfor %}
-                </td>
-                <td>
-                  {% for entry in availabilities if entry.name == name %}
-                    {{ entry.day3 }}
-                  {% endfor %}
-                </td>
-                <td>
-                  {% if battle_summary[name] is defined %}
-                    {% for date, counts in battle_summary[name].items() %}
-                      {{ date }}：{{ counts|sort|join("回目, ") }}回目<br>
-                    {% endfor %}
-                  {% endif %}
-                </td>
+                {% endfor %}
               </tr>
             {% endfor %}
           </tbody>
