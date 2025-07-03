@@ -1,179 +1,182 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>ギルドバトル記録</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>ギルドバトル記録</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">ギルドバトル記録</a>
-  </div>
-</nav>
-
-<div class="container mt-4">
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
-    <li class="nav-item"><button class="nav-link active" id="battle-tab" data-bs-toggle="tab" data-bs-target="#battle" type="button">戦闘記録</button></li>
-    <li class="nav-item"><button class="nav-link" id="declare-tab" data-bs-toggle="tab" data-bs-target="#declare" type="button">削れる％申告</button></li>
-    <li class="nav-item"><button class="nav-link" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button">参加可能時間</button></li>
-    <li class="nav-item"><button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button">申告一覧</button></li>
-  </ul>
-
-  <div class="tab-content pt-4" id="myTabContent">
-    <!-- 戦闘記録 -->
-    <div class="tab-pane fade show active" id="battle">
-      <form action="/submit" method="post" class="card p-3 mb-3">
-        <h5>戦闘記録の登録</h5>
-        <input name="name" class="form-control mb-2" placeholder="名前" required>
-        <select name="day" class="form-select mb-2" required>
-          <option value="DAY1">1日目</option>
-          <option value="DAY2">2日目</option>
-          <option value="DAY3">3日目</option>
-        </select>
-        <select name="count" class="form-select mb-2" required>
-          <option value="1">1回目</option>
-          <option value="2">2回目</option>
-          <option value="3">3回目</option>
-        </select>
-        <input name="stage" type="number" class="form-control mb-2" placeholder="ステージ" required>
-        <input name="damage" type="number" class="form-control mb-2" placeholder="ダメージ" required>
-        <button class="btn btn-primary w-100">記録する</button>
-      </form>
-      <ul class="list-group">
-        {% for entry in log %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          {{ entry.day }} ｜ {{ entry.name }} ｜ {{ entry.stage }}ステ ｜ {{ entry.damage }}ダメージ（{{ entry.count }}回目）
-          <form method="post" action="/delete_battle" class="ms-3">
-            <input type="hidden" name="name" value="{{ entry.name }}">
-            <input type="hidden" name="day" value="{{ entry.day }}">
-            <input type="hidden" name="count" value="{{ entry.count }}">
-            <button class="btn btn-sm btn-danger">削除</button>
-          </form>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <!-- 削れる％申告 -->
-    <div class="tab-pane fade" id="declare">
-      <form action="/declare" method="post" class="card p-3 mb-3">
-        <h5>削れる％の申告</h5>
-        <input name="name" class="form-control mb-2" placeholder="名前" required>
-        {% for i in range(1, 7) %}
-        <input name="stage{{ i }}" type="number" class="form-control mb-2" placeholder="ステージ {{ i }}：削れる％" min="0" max="100" required>
-        {% endfor %}
-        <button class="btn btn-success w-100">申告する</button>
-      </form>
-      <ul class="list-group">
-        {% for entry in declarations %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            {{ entry.name }} ｜ {% for i in range(1, 7) %}{{ i }}: {{ entry["stage" ~ i] }}％ {% endfor %}
-          </div>
-          <form method="post" action="/delete_declare" class="ms-3">
-            <input type="hidden" name="name" value="{{ entry.name }}">
-            <button class="btn btn-sm btn-danger">削除</button>
-          </form>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <!-- 参加可能時間 -->
-    <div class="tab-pane fade" id="available">
-      <form action="/available" method="post" class="card p-3 mb-3">
-        <h5>参加可能時間の申告</h5>
-        <input name="name" class="form-control mb-3" placeholder="名前" required>
-        {% for day in [1,2,3] %}
-        <div class="mb-2">
-          <label class="form-label">Day{{ day }}</label><br>
-          {% for slot in ['11-12', '12-15', '15-18', '18-21', '21-'] %}
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" name="day{{ day }}_slots" value="{{ slot }}" id="day{{ day }}_{{ loop.index }}">
-            <label class="form-check-label" for="day{{ day }}_{{ loop.index }}">{{ slot }}</label>
-          </div>
-          {% endfor %}
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">ギルドバトル記録</a>
         </div>
-        {% endfor %}
-        <button class="btn btn-info w-100">申告する</button>
-      </form>
-<ul class="list-group">
-  {% for entry in availabilities %}
-  <li class="list-group-item d-flex justify-content-between align-items-center">
-    <div>
-      {{ entry.name }} ｜ 
-      1日目: {{ entry.day1 if entry.day1 is string else (entry.day1 | join(', ') if entry.day1 else 'なし') }} ｜ 
-      2日目: {{ entry.day2 if entry.day2 is string else (entry.day2 | join(', ') if entry.day2 else 'なし') }} ｜ 
-      3日目: {{ entry.day3 if entry.day3 is string else (entry.day3 | join(', ') if entry.day3 else 'なし') }}
-    </div>
-    <form method="post" action="/delete_available" class="ms-3">
-      <input type="hidden" name="name" value="{{ entry.name }}">
-      <button class="btn btn-sm btn-danger">削除</button>
-    </form>
-  </li>
-  {% endfor %}
-</ul>
+    </nav>
+
+    <div class="container mt-4">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item"><button class="nav-link active" id="battle-tab" data-bs-toggle="tab" data-bs-target="#battle" type="button">戦闘記録</button></li>
+            <li class="nav-item"><button class="nav-link" id="declare-tab" data-bs-toggle="tab" data-bs-target="#declare" type="button">削れる％申告</button></li>
+            <li class="nav-item"><button class="nav-link" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button">参加可能時間</button></li>
+            <li class="nav-item"><button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button">申告一覧</button></li>
+        </ul>
+
+        <div class="tab-content pt-4" id="myTabContent">
+            <!-- 戦闘記録 -->
+            <div class="tab-pane fade show active" id="battle">
+                <form action="/submit" method="post" class="card p-3 mb-3">
+                    <h5>戦闘記録の登録</h5>
+                    <input name="name" class="form-control mb-2" placeholder="名前" required>
+                    <select name="day" class="form-select mb-2" required>
+                        <option value="DAY1">1日目</option>
+                        <option value="DAY2">2日目</option>
+                        <option value="DAY3">3日目</option>
+                    </select>
+                    <select name="count" class="form-select mb-2" required>
+                        <option value="1">1回目</option>
+                        <option value="2">2回目</option>
+                        <option value="3">3回目</option>
+                    </select>
+                    <input name="stage" type="number" class="form-control mb-2" placeholder="ステージ" required>
+                    <input name="damage" type="number" class="form-control mb-2" placeholder="ダメージ" required>
+                    <button class="btn btn-primary w-100">記録する</button>
+                </form>
+                <ul class="list-group">
+                    {% for entry in log %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ entry.day }} ｜ {{ entry.name }} ｜ {{ entry.stage }}ステ ｜ {{ entry.damage }}ダメージ（{{ entry.count }}回目）
+                        <form method="post" action="/delete_battle" class="ms-3">
+                            <input type="hidden" name="name" value="{{ entry.name }}">
+                            <input type="hidden" name="day" value="{{ entry.day }}">
+                            <input type="hidden" name="count" value="{{ entry.count }}">
+                            <button class="btn btn-sm btn-danger">削除</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- 削れる％申告 -->
+            <div class="tab-pane fade" id="declare">
+                <form action="/declare" method="post" class="card p-3 mb-3">
+                    <h5>削れる％の申告</h5>
+                    <input name="name" class="form-control mb-2" placeholder="名前" required>
+                    {% for i in range(1, 7) %}
+                    <input name="stage{{ i }}" type="number" class="form-control mb-2" placeholder="ステージ {{ i }}：削れる％" min="0" max="100" required>
+                    {% endfor %}
+                    <button class="btn btn-success w-100">申告する</button>
+                </form>
+                <ul class="list-group">
+                    {% for entry in declarations %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            {{ entry.name }} ｜ {% for i in range(1, 7) %}{{ i }}: {{ entry["stage" ~ i] }}％ {% endfor %}
+                        </div>
+                        <form method="post" action="/delete_declare" class="ms-3">
+                            <input type="hidden" name="name" value="{{ entry.name }}">
+                            <button class="btn btn-sm btn-danger">削除</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- 参加可能時間 -->
+            <div class="tab-pane fade" id="available">
+                <form action="/available" method="post" class="card p-3 mb-3">
+                    <h5>参加可能時間の申告</h5>
+                    <input name="name" class="form-control mb-3" placeholder="名前" required>
+                    {% for day in [1,2,3] %}
+                    <div class="mb-2">
+                        <label class="form-label">Day{{ day }}</label><br>
+                        {% for slot in ['11-12', '12-15', '15-18', '18-21', '21-'] %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="day{{ day }}_slots" value="{{ slot }}" id="day{{ day }}_{{ loop.index }}">
+                            <label class="form-check-label" for="day{{ day }}_{{ loop.index }}">{{ slot }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button class="btn btn-info w-100">申告する</button>
+                </form>
+                <ul class="list-group">
+                    {% for entry in availabilities %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            {{ entry.name }} ｜
+                            1日目: {% if entry.day1 %}{{ entry.day1 | join(', ') }}{% else %}なし{% endif %} ｜
+                            2日目: {% if entry.day2 %}{{ entry.day2 | join(', ') }}{% else %}なし{% endif %} ｜
+                            3日目: {% if entry.day3 %}{{ entry.day3 | join(', ') }}{% else %}なし{% endif %}
+                        </div>
+                        <form method="post" action="/delete_available" class="ms-3">
+                            <input type="hidden" name="name" value="{{ entry.name }}">
+                            <button class="btn btn-sm btn-danger">削除</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- 申告一覧 -->
+            <div class="tab-pane fade" id="summary">
+                <h5>プレイヤー申告一覧</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th rowspan="2">プレーヤー名</th>
+                                <th rowspan="2">削れる％</th>
+                                <th rowspan="2">参加可能日程</th>
+                                <th colspan="3">DAY1</th>
+                                <th colspan="3">DAY2</th>
+                                <th colspan="3">DAY3</th>
+                            </tr>
+                            <tr>
+                                {% for i in range(1, 4) %}
+                                <th>{{ i }}回目</th>{% endfor %}
+                                {% for i in range(1, 4) %}
+                                <th>{{ i }}回目</th>{% endfor %}
+                                {% for i in range(1, 4) %}
+                                <th>{{ i }}回目</th>{% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for name in player_names %}
+                            <tr>
+                                <td>{{ name }}</td>
+                                <td>
+                                    {% set declare = declarations | selectattr("name", "equalto", name) | first %}
+                                    {% if declare %}
+                                    {% for i in range(1, 7) %}Stage{{ i }}:{{ declare["stage" ~ i] }}%<br>{% endfor %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set available = availabilities | selectattr("name", "equalto", name) | first %}
+                                    {% if available %}
+                                    1日目: {{ available.day1 | join(', ') if available.day1 else 'なし' }}<br>
+                                    2日目: {{ available.day2 | join(', ') if available.day2 else 'なし' }}<br>
+                                    3日目: {{ available.day3 | join(', ') if available.day3 else 'なし' }}
+                                    {% else %}
+                                    なし
+                                    {% endif %}
+                                </td>
+                                {% for day in ['DAY1', 'DAY2', 'DAY3'] %}
+                                {% for count in [1, 2, 3] %}
+                                <td>
+                                    {% if count in battle_summary.get(name, {}).get(day, set()) %}✓{% endif %}
+                                </td>
+                                {% endfor %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 申告一覧 -->
-    <div class="tab-pane fade" id="summary">
-      <h5>プレイヤー申告一覧</h5>
-      <div class="table-responsive">
-        <table class="table table-bordered text-center align-middle">
-          <thead class="table-light">
-            <tr>
-              <th rowspan="2">プレーヤー名</th>
-              <th rowspan="2">削れる％</th>
-              <th rowspan="2">参加可能日程</th>
-              <th colspan="3">DAY1</th>
-              <th colspan="3">DAY2</th>
-              <th colspan="3">DAY3</th>
-            </tr>
-            <tr>
-              {% for i in range(1, 4) %}<th>{{ i }}回目</th>{% endfor %}
-              {% for i in range(1, 4) %}<th>{{ i }}回目</th>{% endfor %}
-              {% for i in range(1, 4) %}<th>{{ i }}回目</th>{% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for name in player_names %}
-            <tr>
-              <td>{{ name }}</td>
-              <td>
-                {% set declare = declarations | selectattr("name", "equalto", name) | first %}
-                {% if declare %}
-                  {% for i in range(1, 7) %}Stage{{ i }}:{{ declare["stage" ~ i] }}%<br>{% endfor %}
-                {% endif %}
-              </td>
-<td>
-  {% set available = availabilities | selectattr("name", "equalto", name) | first %}
-  {% if available %}
-    1日目: {{ available.day1 if available.day1 is string else (available.day1 | join(', ') if available.day1 else 'なし') }}<br>
-    2日目: {{ available.day2 if available.day2 is string else (available.day2 | join(', ') if available.day2 else 'なし') }}<br>
-    3日目: {{ available.day3 if available.day3 is string else (available.day3 | join(', ') if available.day3 else 'なし') }}
-  {% else %}
-    なし
-  {% endif %}
-</td>
-              {% for day in ['DAY1', 'DAY2', 'DAY3'] %}
-                {% for count in [1, 2, 3] %}
-                <td>
-  {% if count in battle_summary.get(name, {}).get(day, []) %}✓{% endif %}
-</td>
-                {% endfor %}
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
