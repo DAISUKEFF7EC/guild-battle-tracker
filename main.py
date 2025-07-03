@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
 import json
@@ -39,6 +39,7 @@ def show_form(request: Request):
 # ------------------------
 @app.post("/submit")
 def submit_battle(
+    request: Request,
     name: str = Form(...),
     date: str = Form(...),
     count: int = Form(...),
@@ -56,10 +57,10 @@ def submit_battle(
     with open(BATTLE_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
 
-    return RedirectResponse(url="/", status_code=303)
+    return show_form(request)
 
 @app.post("/delete_battle")
-def delete_battle(name: str = Form(...), date: str = Form(...), count: int = Form(...)):
+def delete_battle(request: Request, name: str = Form(...), date: str = Form(...), count: int = Form(...)):
     global battle_log
     battle_log = [
         entry for entry in battle_log
@@ -67,17 +68,15 @@ def delete_battle(name: str = Form(...), date: str = Form(...), count: int = For
     ]
     with open(BATTLE_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
-    return RedirectResponse(url="/", status_code=303)
+
+    return show_form(request)
 
 # ------------------------
 # 削れる％申告（同名上書き + 削除）
 # ------------------------
-@app.get("/declare", response_class=HTMLResponse)
-def show_declare_form(request: Request):
-    return templates.TemplateResponse("declare.html", {"request": request, "declarations": declare_log})
-
 @app.post("/declare")
 def submit_declare(
+    request: Request,
     name: str = Form(...),
     stage1: int = Form(...),
     stage2: int = Form(...),
@@ -112,25 +111,22 @@ def submit_declare(
     with open(DECLARE_FILE, "w", encoding="utf-8") as f:
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
 
-    return RedirectResponse(url="/", status_code=303)
+    return show_form(request)
 
 @app.post("/delete_declare")
-def delete_declare(name: str = Form(...)):
+def delete_declare(request: Request, name: str = Form(...)):
     global declare_log
     declare_log = [entry for entry in declare_log if entry["name"] != name]
     with open(DECLARE_FILE, "w", encoding="utf-8") as f:
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
-    return RedirectResponse(url="/", status_code=303)
+    return show_form(request)
 
 # ------------------------
 # 参加可能時間申告（同名上書き + 削除）
 # ------------------------
-@app.get("/available", response_class=HTMLResponse)
-def show_available_form(request: Request):
-    return templates.TemplateResponse("available.html", {"request": request, "availabilities": available_log})
-
 @app.post("/available")
 def submit_available(
+    request: Request,
     name: str = Form(...),
     day1: str = Form(...),
     day2: str = Form(...),
@@ -156,12 +152,12 @@ def submit_available(
     with open(AVAIL_FILE, "w", encoding="utf-8") as f:
         json.dump(available_log, f, indent=2, ensure_ascii=False)
 
-    return RedirectResponse(url="/", status_code=303)
+    return show_form(request)
 
 @app.post("/delete_available")
-def delete_available(name: str = Form(...)):
+def delete_available(request: Request, name: str = Form(...)):
     global available_log
     available_log = [entry for entry in available_log if entry["name"] != name]
     with open(AVAIL_FILE, "w", encoding="utf-8") as f:
         json.dump(available_log, f, indent=2, ensure_ascii=False)
-    return RedirectResponse(url="/", status_code=303)
+    return show_form(request)
