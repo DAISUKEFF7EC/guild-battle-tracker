@@ -25,9 +25,19 @@ available_log = load_data(AVAIL_FILE)
 # ------------------------
 # トップ（戦闘記録フォーム）
 # ------------------------
+#@app.get("/", response_class=HTMLResponse)
+#def show_form(request: Request):
+#    return templates.TemplateResponse("form.html", {"request": request, "log": battle_log})
+
 @app.get("/", response_class=HTMLResponse)
 def show_form(request: Request):
-    return templates.TemplateResponse("form.html", {"request": request, "log": battle_log})
+    return templates.TemplateResponse("main.html", {
+        "request": request,
+        "log": battle_log,
+        "declarations": declare_log,
+        "availabilities": available_log
+    })
+
 
 @app.post("/submit")
 def submit_battle(
