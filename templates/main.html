@@ -38,8 +38,14 @@
       </form>
       <ul class="list-group">
         {% for entry in log %}
-          <li class="list-group-item">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
             {{ entry.date }} ｜ {{ entry.name }} ｜ {{ entry.stage }}ステ ｜ {{ entry.damage }}ダメージ（{{ entry.count }}回目）
+            <form method="post" action="/delete_battle" class="ms-3">
+              <input type="hidden" name="name" value="{{ entry.name }}">
+              <input type="hidden" name="date" value="{{ entry.date }}">
+              <input type="hidden" name="count" value="{{ entry.count }}">
+              <button class="btn btn-sm btn-danger">削除</button>
+            </form>
           </li>
         {% endfor %}
       </ul>
@@ -57,8 +63,14 @@
       </form>
       <ul class="list-group">
         {% for entry in declarations %}
-          <li class="list-group-item">
-            {{ entry.name }} ｜ {% for i in range(1, 7) %}{{ i }}: {{ entry["stage" ~ i] }}％ {% endfor %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {{ entry.name }} ｜ {% for i in range(1, 7) %}{{ i }}: {{ entry["stage" ~ i] }}％ {% endfor %}
+            </div>
+            <form method="post" action="/delete_declare" class="ms-3">
+              <input type="hidden" name="name" value="{{ entry.name }}">
+              <button class="btn btn-sm btn-danger">削除</button>
+            </form>
           </li>
         {% endfor %}
       </ul>
@@ -76,8 +88,14 @@
       </form>
       <ul class="list-group">
         {% for entry in availabilities %}
-          <li class="list-group-item">
-            {{ entry.name }} ｜ 1日目: {{ entry.day1 }} ｜ 2日目: {{ entry.day2 }} ｜ 3日目: {{ entry.day3 }}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {{ entry.name }} ｜ 1日目: {{ entry.day1 }} ｜ 2日目: {{ entry.day2 }} ｜ 3日目: {{ entry.day3 }}
+            </div>
+            <form method="post" action="/delete_available" class="ms-3">
+              <input type="hidden" name="name" value="{{ entry.name }}">
+              <button class="btn btn-sm btn-danger">削除</button>
+            </form>
           </li>
         {% endfor %}
       </ul>
