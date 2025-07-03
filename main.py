@@ -80,6 +80,12 @@ def submit_battle(
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
 
     return show_form(request)
+    
+@app.get("/debug/battle_log")
+def debug_battle_log():
+    from fastapi.responses import JSONResponse
+    return JSONResponse(content=battle_log)
+
 
 @app.post("/delete_battle")
 def delete_battle(request: Request, name: str = Form(...), day: str = Form(...), count: str = Form(...)):
