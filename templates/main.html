@@ -15,23 +15,21 @@
 </nav>
 
 <div class="container mt-4">
-  <!-- タブメニュー -->
+  <!-- タブ -->
   <ul class="nav nav-tabs" id="myTab" role="tablist">
-    <li class="nav-item"><button class="nav-link active" id="battle-tab" data-bs-toggle="tab" data-bs-target="#battle" type="button">戦闘記録</button></li>
-    <li class="nav-item"><button class="nav-link" id="declare-tab" data-bs-toggle="tab" data-bs-target="#declare" type="button">削れる％申告</button></li>
-    <li class="nav-item"><button class="nav-link" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button">参加可能時間</button></li>
-    <li class="nav-item"><button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button">申告一覧</button></li>
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#battle">戦闘記録</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#declare">削れる％申告</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#available">参加可能時間</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#summary">申告一覧</button></li>
   </ul>
 
-  <!-- タブ内容 -->
-  <div class="tab-content pt-4" id="myTabContent">
-
+  <div class="tab-content pt-4">
     <!-- 戦闘記録 -->
-    <div class="tab-pane fade show active" id="battle" role="tabpanel">
+    <div class="tab-pane fade show active" id="battle">
       <form action="/submit" method="post" class="card p-3 mb-3">
         <h5>戦闘記録の登録</h5>
         <input name="name" class="form-control mb-2" placeholder="名前" required>
-        <input name="date" class="form-control mb-2" placeholder="日付 (例: 2025-07-02)" required>
+        <input name="date" type="date" class="form-control mb-2" required>
         <input name="count" type="number" class="form-control mb-2" placeholder="回数" required>
         <input name="stage" type="number" class="form-control mb-2" placeholder="ステージ" required>
         <input name="damage" type="number" class="form-control mb-2" placeholder="ダメージ" required>
@@ -53,7 +51,7 @@
     </div>
 
     <!-- 削れる％ -->
-    <div class="tab-pane fade" id="declare" role="tabpanel">
+    <div class="tab-pane fade" id="declare">
       <form action="/declare" method="post" class="card p-3 mb-3">
         <h5>削れる％の申告</h5>
         <input name="name" class="form-control mb-2" placeholder="名前" required>
@@ -78,13 +76,21 @@
     </div>
 
     <!-- 参加可能時間 -->
-    <div class="tab-pane fade" id="available" role="tabpanel">
+    <div class="tab-pane fade" id="available">
       <form action="/available" method="post" class="card p-3 mb-3">
         <h5>参加可能時間の申告</h5>
-        <input name="name" class="form-control mb-2" placeholder="名前" required>
-        <input name="day1" class="form-control mb-2" placeholder="1日目の参加可能時間" required>
-        <input name="day2" class="form-control mb-2" placeholder="2日目の参加可能時間" required>
-        <input name="day3" class="form-control mb-2" placeholder="3日目の参加可能時間" required>
+        <input name="name" class="form-control mb-3" placeholder="名前" required>
+        {% for day in [1,2,3] %}
+        <div class="mb-2">
+          <label class="form-label">Day{{ day }}</label><br>
+          {% for slot in ['11-12', '12-15', '15-18', '18-21', '21-'] %}
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="day{{ day }}_slots" value="{{ slot }}" id="day{{ day }}_{{ loop.index }}">
+            <label class="form-check-label" for="day{{ day }}_{{ loop.index }}">{{ slot }}</label>
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
         <button class="btn btn-info w-100">申告する</button>
       </form>
       <ul class="list-group">
@@ -103,7 +109,7 @@
     </div>
 
     <!-- 申告一覧 -->
-    <div class="tab-pane fade" id="summary" role="tabpanel">
+    <div class="tab-pane fade" id="summary">
       <h5>プレイヤー申告一覧</h5>
       <div class="table-responsive">
         <table class="table table-bordered table-striped text-center">
@@ -114,11 +120,11 @@
               <th>1日目</th>
               <th>2日目</th>
               <th>3日目</th>
+              <th>戦闘記録</th>
             </tr>
           </thead>
           <tbody>
-            {% set names = (declarations + availabilities)|map(attribute='name')|list|unique %}
-            {% for name in names %}
+            {% for name in player_names %}
               <tr>
                 <td>{{ name }}</td>
                 <td>
@@ -132,18 +138,25 @@
                 </td>
                 <td>
                   {% for entry in availabilities if entry.name == name %}
-                    {{ entry.day1 if entry.day1.strip() else '' }}
+                    {{ entry.day1 }}
                   {% endfor %}
                 </td>
                 <td>
                   {% for entry in availabilities if entry.name == name %}
-                    {{ entry.day2 if entry.day2.strip() else '' }}
+                    {{ entry.day2 }}
                   {% endfor %}
                 </td>
                 <td>
                   {% for entry in availabilities if entry.name == name %}
-                    {{ entry.day3 if entry.day3.strip() else '' }}
+                    {{ entry.day3 }}
                   {% endfor %}
+                </td>
+                <td>
+                  {% if battle_summary[name] is defined %}
+                    {% for date, counts in battle_summary[name].items() %}
+                      {{ date }}：{{ counts|sort|join("回目, ") }}回目<br>
+                    {% endfor %}
+                  {% endif %}
                 </td>
               </tr>
             {% endfor %}
