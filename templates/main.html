@@ -105,9 +105,9 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
                             {{ entry.name }} ｜
-                            1日目: {% if entry.day1 and entry.day1 != "なし" %}{{ entry.day1 | join(', ') }}{% else %}なし{% endif %} ｜
-                            2日目: {% if entry.day2 and entry.day2 != "なし" %}{{ entry.day2 | join(', ') }}{% else %}なし{% endif %} ｜
-                            3日目: {% if entry.day3 and entry.day3 != "なし" %}{{ entry.day3 | join(', ') }}{% else %}なし{% endif %}
+                            1日目: {{ available.day1.split(',') | map('trim') | join(', ') if available.day1 != 'なし' else 'なし' }}｜
+                            2日目: {{ available.day2.split(',') | map('trim') | join(', ') if available.day2 != 'なし' else 'なし' }}｜
+                            3日目:  {{ available.day3.split(',') | map('trim') | join(', ') if available.day3 != 'なし' else 'なし' }}
                         </div>
                         <form method="post" action="/delete_available" class="ms-3">
                             <input type="hidden" name="name" value="{{ entry.name }}">
