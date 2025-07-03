@@ -26,9 +26,16 @@ available_log = load_data(AVAIL_FILE)
 
 # 戦闘記録をプレイヤー×日付でまとめる
 def summarize_battle_log():
-    summary = defaultdict(lambda: defaultdict(list))  # {name: {day: [1回目, 2回目, ...]}}
+    summary = defaultdict(lambda: defaultdict(list))
     for entry in battle_log:
         summary[entry["name"]][entry["day"]].append(entry["count"])
+
+    # 全員分の名前を用意して空のエントリを追加
+    all_names = {entry["name"] for entry in battle_log + declare_log + available_log}
+    for name in all_names:
+        if name not in summary:
+            summary[name] = {}
+
     return {name: {day: sorted(set(counts)) for day, counts in days.items()} for name, days in summary.items()}
 
 # プレイヤー一覧
