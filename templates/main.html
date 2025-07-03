@@ -20,12 +20,13 @@
     <li class="nav-item"><button class="nav-link active" id="battle-tab" data-bs-toggle="tab" data-bs-target="#battle" type="button">戦闘記録</button></li>
     <li class="nav-item"><button class="nav-link" id="declare-tab" data-bs-toggle="tab" data-bs-target="#declare" type="button">削れる％申告</button></li>
     <li class="nav-item"><button class="nav-link" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button">参加可能時間</button></li>
+    <li class="nav-item"><button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button">申告一覧</button></li>
   </ul>
 
   <!-- タブ内容 -->
   <div class="tab-content pt-4" id="myTabContent">
 
-    <!-- 戦闘記録フォーム -->
+    <!-- 戦闘記録 -->
     <div class="tab-pane fade show active" id="battle" role="tabpanel">
       <form action="/submit" method="post" class="card p-3 mb-3">
         <h5>戦闘記録の登録</h5>
@@ -99,6 +100,56 @@
           </li>
         {% endfor %}
       </ul>
+    </div>
+
+    <!-- 申告一覧 -->
+    <div class="tab-pane fade" id="summary" role="tabpanel">
+      <h5>プレイヤー申告一覧</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center">
+          <thead class="table-light">
+            <tr>
+              <th>名前</th>
+              <th>ステージ削り</th>
+              <th>1日目</th>
+              <th>2日目</th>
+              <th>3日目</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set names = (declarations + availabilities)|map(attribute='name')|list|unique %}
+            {% for name in names %}
+              <tr>
+                <td>{{ name }}</td>
+                <td>
+                  {% for entry in declarations if entry.name == name %}
+                    {% for i in range(1,7) %}
+                      {% if entry["stage" ~ i]|int > 0 %}
+                        STG{{ i }} {{ entry["stage" ~ i] }}%<br>
+                      {% endif %}
+                    {% endfor %}
+                  {% endfor %}
+                </td>
+                <td>
+                  {% for entry in availabilities if entry.name == name %}
+                    {{ entry.day1 if entry.day1.strip() else '' }}
+                  {% endfor %}
+                </td>
+                <td>
+                  {% for entry in availabilities if entry.name == name %}
+                    {{ entry.day2 if entry.day2.strip() else '' }}
+                  {% endfor %}
+                </td>
+                <td>
+                  {% for entry in availabilities if entry.name == name %}
+                    {{ entry.day3 if entry.day3.strip() else '' }}
+                  {% endfor %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </div>
