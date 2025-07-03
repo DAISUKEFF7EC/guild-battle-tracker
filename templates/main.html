@@ -45,7 +45,7 @@
                 <ul class="list-group">
                     {% for entry in log %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ entry.day }} ｜ {{ entry.name }} ｜ {{ entry.stage }}ステ ｜ {{ entry.damage }}ダメージ（{{ entry.count }}回目）
+                        {{ entry.day }} ｜ {{ entry.name }} ｜ {{ entry.stage }}ステ ｜ {{ entry.damage }}ダメージ（{{ entry.count }}）
                         <form method="post" action="/delete_battle" class="ms-3">
                             <input type="hidden" name="name" value="{{ entry.name }}">
                             <input type="hidden" name="day" value="{{ entry.day }}">
