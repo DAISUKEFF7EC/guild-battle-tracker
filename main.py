@@ -65,7 +65,14 @@ def submit_battle(
     stage: int = Form(...),
     damage: int = Form(...)
 ):
-    count = f"{count}回目"  # ← ここで変換！
+    # 表示用に day/count を統一
+    day_map = {
+        "DAY1": "1日目",
+        "DAY2": "2日目",
+        "DAY3": "3日目"
+    }
+    day = day_map.get(day, day)
+    count = f"{count}回目"
 
     new_entry = {
         "name": name,
@@ -80,11 +87,6 @@ def submit_battle(
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
 
     return show_form(request)
-    
-@app.get("/debug/battle_log")
-def debug_battle_log():
-    from fastapi.responses import JSONResponse
-    return JSONResponse(content=battle_log)
 
 
 @app.post("/delete_battle")
