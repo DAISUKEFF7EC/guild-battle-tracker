@@ -130,23 +130,22 @@ def delete_declare(request: Request, name: str = Form(...)):
 # 参加可能時間（上書き＋削除）
 # -------------------------------
 @app.post("/available")
+
 def submit_available(
     request: Request,
     name: str = Form(...),
-    day1: List[str] = Form(...),
-    day2: List[str] = Form(...),
-    day3: List[str] = Form(...)
+    day1: Optional[str] = Form(""),
+    day2: Optional[str] = Form(""),
+    day3: Optional[str] = Form("")
 ):
+    # 同名があれば上書き、なければ追加
     found = False
     for entry in available_log:
         if entry["name"] == name:
-            entry.update({
-                "day1": day1,
-                "day2": day2,
-                "day3": day3
-            })
+            entry.update({"day1": day1, "day2": day2, "day3": day3})
             found = True
             break
+
     if not found:
         available_log.append({
             "name": name,
@@ -154,8 +153,10 @@ def submit_available(
             "day2": day2,
             "day3": day3
         })
+
     with open(AVAIL_FILE, "w", encoding="utf-8") as f:
         json.dump(available_log, f, indent=2, ensure_ascii=False)
+
     return show_form(request)
 
 @app.post("/delete_available")
