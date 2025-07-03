@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from typing import List
+from typing import List, Optional
 import os
 import json
 from collections import defaultdict
@@ -130,7 +130,6 @@ def delete_declare(request: Request, name: str = Form(...)):
 # 参加可能時間（上書き＋削除）
 # -------------------------------
 @app.post("/available")
-
 def submit_available(
     request: Request,
     name: str = Form(...),
@@ -138,7 +137,6 @@ def submit_available(
     day2: Optional[str] = Form(""),
     day3: Optional[str] = Form("")
 ):
-    # 同名があれば上書き、なければ追加
     found = False
     for entry in available_log:
         if entry["name"] == name:
