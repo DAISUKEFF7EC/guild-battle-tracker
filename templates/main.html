@@ -164,7 +164,7 @@
                                 {% for day in ['DAY1', 'DAY2', 'DAY3'] %}
                                 {% for count in [1, 2, 3] %}
                                 <td>
-                                    {% if count in battle_summary.get(name, {}).get(day, set()) %}✓{% endif %}
+                                    {% if count in battle_summary.get(name, {}).get(day, []) %}✓{% endif %}
                                 </td>
                                 {% endfor %}
                                 {% endfor %}
