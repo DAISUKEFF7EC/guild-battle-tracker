@@ -16,5 +16,14 @@
     "stage4": 100,
     "stage5": 100,
     "stage6": 100
+  },
+  {
+    "name": "てんかす",
+    "stage1": 100,
+    "stage2": 100,
+    "stage3": 50,
+    "stage4": 50,
+    "stage5": 50,
+    "stage6": 50
   }
 ]
