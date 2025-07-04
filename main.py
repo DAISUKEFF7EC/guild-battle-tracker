@@ -6,7 +6,7 @@ import os
 import json
 from pathlib import Path
 from collections import defaultdict
-from github import Github  # ← 追加
+from github import Github
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -14,10 +14,14 @@ templates = Jinja2Templates(directory="templates")
 BATTLE_FILE = "battle_log.json"
 DECLARE_FILE = "declare_log.json"
 AVAIL_FILE = "available_log.json"
-REPO_NAME = "DAISUKEFF7EC/guild-battle-tracker"  # 例: daisukeok/guild-battle-tracker
-FILE_PATH_ON_GITHUB = "battle_log.json"
 
-# GitHubにpushする関数（追加）
+GITHUB_BATTLE_FILE = "battle_log.json"
+GITHUB_DECLARE_FILE = "declare_log.json"
+GITHUB_AVAIL_FILE = "available_log.json"
+
+REPO_NAME = "DAISUKEFF7EC/guild-battle-tracker"
+
+# GitHubにpushする関数
 def push_to_github(json_path, repo_name, file_path, commit_message, token):
     g = Github(token)
     repo = g.get_repo(repo_name)
@@ -91,18 +95,9 @@ def submit_battle(
     with open(BATTLE_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
 
-    # GitHubにpush（追加部分）
     token = os.getenv("GITHUB_TOKEN")
     if token:
-        push_to_github(
-            json_path=BATTLE_FILE,
-            repo_name=REPO_NAME,
-            file_path=FILE_PATH_ON_GITHUB,
-            commit_message=f"Backup by {name}",
-            token=token
-        )
-    else:
-        print("⚠ GITHUB_TOKEN が見つかりません。Render環境変数を確認してください。")
+        push_to_github(BATTLE_FILE, REPO_NAME, GITHUB_BATTLE_FILE, f"Backup battle_log by {name}", token)
 
     return show_form(request)
 
@@ -115,6 +110,11 @@ def delete_battle(request: Request, name: str = Form(...), day: str = Form(...),
     ]
     with open(BATTLE_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
+
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        push_to_github(BATTLE_FILE, REPO_NAME, GITHUB_BATTLE_FILE, f"Delete battle_log entry by {name}", token)
+
     return show_form(request)
 
 @app.post("/declare")
@@ -145,6 +145,11 @@ def submit_declare(
         })
     with open(DECLARE_FILE, "w", encoding="utf-8") as f:
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
+
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        push_to_github(DECLARE_FILE, REPO_NAME, GITHUB_DECLARE_FILE, f"Backup declare_log by {name}", token)
+
     return show_form(request)
 
 @app.post("/delete_declare")
@@ -153,6 +158,11 @@ def delete_declare(request: Request, name: str = Form(...)):
     declare_log = [entry for entry in declare_log if entry["name"] != name]
     with open(DECLARE_FILE, "w", encoding="utf-8") as f:
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
+
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        push_to_github(DECLARE_FILE, REPO_NAME, GITHUB_DECLARE_FILE, f"Delete declare_log entry by {name}", token)
+
     return show_form(request)
 
 @app.post("/available")
@@ -185,6 +195,10 @@ def submit_available(
     with open(AVAIL_FILE, "w", encoding="utf-8") as f:
         json.dump(available_log, f, indent=2, ensure_ascii=False)
 
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        push_to_github(AVAIL_FILE, REPO_NAME, GITHUB_AVAIL_FILE, f"Backup available_log by {name}", token)
+
     return show_form(request)
 
 @app.post("/delete_available")
@@ -193,4 +207,9 @@ def delete_available(request: Request, name: str = Form(...)):
     available_log = [entry for entry in available_log if entry["name"] != name]
     with open(AVAIL_FILE, "w", encoding="utf-8") as f:
         json.dump(available_log, f, indent=2, ensure_ascii=False)
+
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        push_to_github(AVAIL_FILE, REPO_NAME, GITHUB_AVAIL_FILE, f"Delete available_log entry by {name}", token)
+
     return show_form(request)
