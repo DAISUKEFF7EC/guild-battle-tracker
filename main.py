@@ -4,7 +4,9 @@ from fastapi.templating import Jinja2Templates
 from typing import List, Optional
 import os
 import json
+from pathlib import Path
 from collections import defaultdict
+from github import Github  # ← 追加
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -12,6 +14,20 @@ templates = Jinja2Templates(directory="templates")
 BATTLE_FILE = "battle_log.json"
 DECLARE_FILE = "declare_log.json"
 AVAIL_FILE = "available_log.json"
+REPO_NAME = "DAISUKEFF7EC/guild-battle-tracker"  # 例: daisukeok/guild-battle-tracker
+FILE_PATH_ON_GITHUB = "battle_log.json"
+
+# GitHubにpushする関数（追加）
+def push_to_github(json_path, repo_name, file_path, commit_message, token):
+    g = Github(token)
+    repo = g.get_repo(repo_name)
+    with open(json_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    try:
+        contents = repo.get_contents(file_path)
+        repo.update_file(file_path, commit_message, content, contents.sha)
+    except:
+        repo.create_file(file_path, commit_message, content)
 
 # ファイル読み込み
 def load_data(file_path):
@@ -29,21 +45,16 @@ def summarize_battle_log():
     summary = defaultdict(lambda: defaultdict(list))
     for entry in battle_log:
         summary[entry["name"]][entry["day"]].append(entry["count"])
-
-    # 全員分の名前を用意して空のエントリを追加
     all_names = {entry["name"] for entry in battle_log + declare_log + available_log}
     for name in all_names:
         if name not in summary:
             summary[name] = {}
-
     return {name: {day: sorted(set(counts)) for day, counts in days.items()} for name, days in summary.items()}
 
-# プレイヤー一覧
 def get_all_names():
     names = {entry["name"] for entry in battle_log + declare_log + available_log}
     return sorted(names)
 
-# トップ（テンプレートに集計反映）
 @app.get("/", response_class=HTMLResponse)
 def show_form(request: Request):
     return templates.TemplateResponse("main.html", {
@@ -55,7 +66,6 @@ def show_form(request: Request):
         "player_names": get_all_names()
     })
 
-# 戦闘記録 登録・削除
 @app.post("/submit")
 def submit_battle(
     request: Request,
@@ -65,12 +75,7 @@ def submit_battle(
     stage: int = Form(...),
     damage: int = Form(...)
 ):
-    # 表示用に day/count を統一
-    day_map = {
-        "DAY1": "1日目",
-        "DAY2": "2日目",
-        "DAY3": "3日目"
-    }
+    day_map = {"DAY1": "1日目", "DAY2": "2日目", "DAY3": "3日目"}
     day = day_map.get(day, day)
     count = f"{count}回目"
 
@@ -86,8 +91,20 @@ def submit_battle(
     with open(BATTLE_FILE, "w", encoding="utf-8") as f:
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
 
-    return show_form(request)
+    # GitHubにpush（追加部分）
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        push_to_github(
+            json_path=BATTLE_FILE,
+            repo_name=REPO_NAME,
+            file_path=FILE_PATH_ON_GITHUB,
+            commit_message=f"Backup by {name}",
+            token=token
+        )
+    else:
+        print("⚠ GITHUB_TOKEN が見つかりません。Render環境変数を確認してください。")
 
+    return show_form(request)
 
 @app.post("/delete_battle")
 def delete_battle(request: Request, name: str = Form(...), day: str = Form(...), count: str = Form(...)):
@@ -100,7 +117,6 @@ def delete_battle(request: Request, name: str = Form(...), day: str = Form(...),
         json.dump(battle_log, f, indent=2, ensure_ascii=False)
     return show_form(request)
 
-# 削れる％申告（上書き＋削除）
 @app.post("/declare")
 def submit_declare(
     request: Request,
@@ -139,7 +155,6 @@ def delete_declare(request: Request, name: str = Form(...)):
         json.dump(declare_log, f, indent=2, ensure_ascii=False)
     return show_form(request)
 
-# 参加可能時間（上書き＋削除）
 @app.post("/available")
 def submit_available(
     request: Request,
