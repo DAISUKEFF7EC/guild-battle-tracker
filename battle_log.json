@@ -33,5 +33,12 @@
     "count": "2回目",
     "stage": 6,
     "damage": 90
+  },
+  {
+    "name": "ロラン",
+    "day": "2日目",
+    "count": "3回目",
+    "stage": 1,
+    "damage": 1
   }
 ]
