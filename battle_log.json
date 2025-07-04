@@ -5,5 +5,12 @@
     "count": "1回目",
     "stage": 5,
     "damage": 50
+  },
+  {
+    "name": "DAISUKE",
+    "day": "1日目",
+    "count": "2回目",
+    "stage": 5,
+    "damage": 30
   }
 ]
