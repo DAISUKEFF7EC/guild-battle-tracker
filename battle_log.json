@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "name": "DAISUKE",
+    "day": "1日目",
+    "count": "2回目",
+    "stage": 5,
+    "damage": 30
+  },
+  {
+    "name": "DAISUKE",
+    "day": "1日目",
+    "count": "3回目",
+    "stage": 6,
+    "damage": 20
+  },
+  {
+    "name": "ロラン",
+    "day": "2日目",
+    "count": "1回目",
+    "stage": 6,
+    "damage": 100
+  },
+  {
+    "name": "ロラン",
+    "day": "2日目",
+    "count": "2回目",
+    "stage": 6,
+    "damage": 90
+  },
+  {
+    "name": "ロラン",
+    "day": "2日目",
+    "count": "3回目",
+    "stage": 1,
+    "damage": 1
+  }
+]
