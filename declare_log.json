@@ -43,5 +43,14 @@
     "stage4": 100,
     "stage5": 100,
     "stage6": 35
+  },
+  {
+    "name": "紗姫",
+    "stage1": 100,
+    "stage2": 100,
+    "stage3": 100,
+    "stage4": 50,
+    "stage5": 30,
+    "stage6": 20
   }
 ]
