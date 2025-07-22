@@ -52,5 +52,14 @@
     "stage4": 50,
     "stage5": 30,
     "stage6": 20
+  },
+  {
+    "name": "みんぎ",
+    "stage1": 100,
+    "stage2": 100,
+    "stage3": 100,
+    "stage4": 100,
+    "stage5": 55,
+    "stage6": 20
   }
 ]
