@@ -26,7 +26,8 @@
             
 
             <!-- 削れる％申告 -->
-            <div class="tab-pane fade" id="declare">
+         　 <div class="tab-pane fade show active" id="declare">
+           
                 <form action="/declare" method="post" class="card p-3 mb-3">
                     <h5>削れる％の申告</h5>
                     <input name="name" class="form-control mb-2" placeholder="名前" required>
@@ -85,8 +86,8 @@
                     {% endfor %}
                 </ul>
             </div>
-<!-- 戦闘記録 -->
-            <div class="tab-pane fade show active" id="battle">
+　　　　　<!-- 戦闘記録 -->
+            <div class="tab-pane fade" id="battle">
                 <form action="/submit" method="post" class="card p-3 mb-3">
                     <h5>戦闘記録の登録</h5>
                     <input name="name" class="form-control mb-2" placeholder="名前" required>
